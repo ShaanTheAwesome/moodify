@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from dotenv import load_dotenv
 from fastapi import Request
+from app.emotion import generate_mood
 import urllib.parse
 import os
 import requests
@@ -43,6 +44,18 @@ def get_access_token():
         return None
     
     return token_data.get("access_token")
+
+def get_artists(headers):
+    return requests.get(
+        "https://api.spotify.com/v1/me/top/artists?limit=5",
+        headers=headers
+    ).json()
+
+def get_tracks(headers):
+    return requests.get(
+        "https://api.spotify.com/v1/me/top/tracks?limit=5",
+        headers=headers
+    ).json()
 
 @app.get("/api/health")
 def health():
@@ -140,15 +153,8 @@ def get_me():
         headers=headers
     ).json()
 
-    artists = requests.get(
-        "https://api.spotify.com/v1/me/top/artists?limit=5",
-        headers=headers
-    ).json()
-    
-    tracks = requests.get(
-        "https://api.spotify.com/v1/me/top/tracks?limit=5",
-        headers=headers
-    ).json()
+    artists = get_artists(headers)
+    tracks = get_tracks(headers)
 
     dashboard = {
         "profile": profile,
@@ -157,6 +163,73 @@ def get_me():
     }
 
     return dashboard
+
+@app.get("/api/mood")
+def get_mood():
+    access_token = get_access_token()
+    if not access_token:
+        return {"error": "not authenticated"}
+
+    headers = {
+        "Authorization": f"Bearer {access_token}"
+    }
+
+    # Get top tracks
+    tracks_res = requests.get(
+        "https://api.spotify.com/v1/me/top/tracks?limit=30",
+        headers=headers
+    ).json()
+
+    tracks = tracks_res["items"]
+    track_ids = [track["id"] for track in tracks]
+
+    # # Get audio features
+    # features_res = requests.get(
+    #     "https://api.spotify.com/v1/audio-features",
+    #     headers=headers,
+    #     params={"id": ",".join(track_ids)}
+    # ).json()
+
+    print(track_ids)
+    print("---------------------------")
+    print(tracks[0]["available_markets"])
+    return requests.get(
+            "https://api.spotify.com/v1/audio-features/6y5SuF4NxGkvwpAdqcAkD3",
+            headers=headers
+        ).json()
+
+    features = []
+    for track_id in track_ids:
+        feature = requests.get(
+            "https://api.spotify.com/v1/audio-features/{track_id}",
+            headers=headers
+        ).json()
+        features.append(feature)
+
+    features_res = {"features" : features}
+
+    return features_res
+
+    audio_features = [f for f in features_res["audio_features"] if f]
+
+    # Get top artists + genres
+    artists_res = requests.get(
+        "https://api.spotify.com/v1/me/top/artists?limit=10",
+        headers=headers
+    ).json()
+
+    artist_genres = []
+    for artist in artists_res["items"]:
+        artist_genres.extend(artist["genres"])
+
+    # Call emotion engine
+    mood_result = generate_mood(
+        tracks=tracks,
+        audio_features=audio_features,
+        artist_genres=artist_genres
+    )
+
+    return mood_result
 
 
 # @app.get("/api/activity")

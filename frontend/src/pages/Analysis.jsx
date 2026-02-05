@@ -26,23 +26,17 @@ const item = {
   }
 };
 
-function App() {
+export default function Analysis() {
 
   const transform = "transform transition-transform duration-150 ease-out hover:scale-115";
-
-  const handleAnalysis = () => {
-      window.location.href = "http://127.0.0.1:8000/api/mood"
-  }
 
   return (
     <div>
       <motion.main className="flex flex-col items-center mt-40 h-screen bg-white space-y-8" variants={container} initial="hidden" animate="visible">
-        <motion.h1 className='text-8xl font-bold' variants={item}>Moodify</motion.h1>
+        <motion.h1 className='text-8xl font-bold' variants={item}>Analysis</motion.h1>
         <motion.p className='text-2xl text-[#8C8C8C]' variants={item}>Reviews you're spotify listening activity and judges your mood</motion.p>
-        <motion.button onClick={handleAnalysis} className={`${transform} flex space-y-0 bg-[#00C407] text-white font-bold text-4xl px-20 py-10 rounded-full hover:scale-110 hover:cursor-pointer`} variants={item}>Analyse</motion.button>
+        <motion.button className={`${transform} flex space-y-0 bg-[#00C407] text-white font-bold text-4xl px-20 py-10 rounded-full hover:scale-110 hover:cursor-pointer`} variants={item}>Analyse</motion.button>
       </motion.main>
     </div>
   )
 }
-
-export default App

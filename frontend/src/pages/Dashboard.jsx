@@ -6,6 +6,7 @@ export default function Dashboard() {
   const [topTracks, setTopTracks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [dots, setDots] = useState("");
 
   useEffect(() => {
     fetch("http://127.0.0.1:8000/api/profile", {
@@ -29,8 +30,18 @@ export default function Dashboard() {
       });
   }, []);
 
+  useEffect(() => {
+    if (!loading) return;
+
+    const interval = setInterval(() => {
+      setDots(prev => (prev.length === 3 ? "" : prev + "."));
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [loading]);
+
   if (loading) {
-    return <p className="flex flex-col items-center mt-40 h-screen bg-white space-y-8 text-center mt-20 text-8xl font-bold">Loading dashboard...</p>;
+    return <p className="flex flex-col items-center mt-40 h-screen bg-white space-y-8 text-center mt-20 text-8xl font-bold">Loading{dots}</p>;
   }
 
   if (error) {

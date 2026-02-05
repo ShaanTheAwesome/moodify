@@ -16,10 +16,6 @@ export default function Navbar() {
     window.location.href = "http://127.0.0.1:8000/api/logout"
   };
 
-  const handleGenres = () => {
-    window.location.href = "http://127.0.0.1:8000/api/genres"
-  }
-
   useEffect(() => {
     fetch("http://127.0.0.1:8000/api/auth/status", {
       credentials: "include"
@@ -37,7 +33,7 @@ export default function Navbar() {
   return (
     <div className="bg-black text-xl font-bold text-white flex px-14 py-8 justify-between items-center">
       <a href="/" className={`${transform} hover:text-green-400`}>
-        Spotify Thing
+        Moodify
       </a>
 
 
@@ -47,9 +43,6 @@ export default function Navbar() {
           </button>
         ) : (
           <div className={`flex items-center space-x-12`}>
-            <a className={`hover:text-green-400 hover:cursor-pointer ${transform}`} onClick={handleGenres}>
-              Genres
-            </a>
             <a href="/dashboard" className={`hover:text-green-400 hover:cursor-pointer ${transform}`}>
               Dashboard
             </a>
